@@ -1,0 +1,8 @@
+.idea
+.DS_Store
+
+composer.phar
+vendor
+*.cache
+
+reports
