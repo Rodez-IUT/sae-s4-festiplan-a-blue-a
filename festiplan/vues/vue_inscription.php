@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <title>Inscription</title>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/css/index.css"/>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+    <link href="../static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/index.css"/>
+    <link href="../static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container centreVertical">
@@ -13,7 +13,7 @@
             <form action="index.php" method="post">
                 <input name="controller" type="hidden" value="UtilisateurCompte">
                 <input name="action" type="hidden" value="creerCompteUtilisateur">
-                <img src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/images/logo_blanc.png" alt="Festiplan Logo">
+                <img src="../static/images/logo_blanc.png" alt="Festiplan Logo">
                 <br><br>
                 <h2 class="grand">Inscription</h2>
                 <br><br>

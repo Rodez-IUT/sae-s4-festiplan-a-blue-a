@@ -9,9 +9,9 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
 <head>
     <meta charset="UTF-8">
     <title>Modifier un festival </title>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/css/index.css"/>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+    <link href="../static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/index.css"/>
+    <link href="../static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
 </head>
 
 <!-- En tête -->
@@ -20,7 +20,7 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
         <div class="row">
             <div class="col-3 col-md-2">
                 <a href="index.php">
-                    <img src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/images/logo_noir.png" alt="Logo Festiplan" class="logo-festiplan">
+                    <img src="../static/images/logo_noir.png" alt="Logo Festiplan" class="logo-festiplan">
                 </a>
             </div>
             <div class="col-8">
@@ -134,6 +134,6 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
             </div>
         </div>
     </form>
-    <script src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/js/script.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 </html>

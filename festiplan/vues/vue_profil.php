@@ -9,16 +9,16 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
 <head>
     <meta charset="utf-8">
     <title>Profil</title>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/css/index.css"/>
-    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+    <link href="../static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/index.css"/>
+    <link href="../static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
 </head>
 <header>
     <div class="container-fluid header-blanc">
         <div class="row">
             <div class="col-3 col-md-2">
                 <a href="index.php">
-                    <img src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/images/logo_blanc.png" alt="Logo Festiplan" class="logo-festiplan">
+                    <img src="../static/images/logo_blanc.png" alt="Logo Festiplan" class="logo-festiplan">
                 </a>
             </div>
             <div class="offset-8 col-1 col-md-2 text-right"> <!-- Ajoutez la classe text-right pour aligner à droite -->
