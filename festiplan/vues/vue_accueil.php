@@ -10,9 +10,9 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
 <head>
     <meta charset="UTF-8">
     <title>Accueil</title>
-    <link href="festiplan/static/bootstrap-4.6.2-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="festiplan/static/css/index.css"/>
-    <link href="festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/css/index.css"/>
+    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/fontawesome-free-6.2.1-web/css/all.css" rel="stylesheet">
 </head>
 <!--En tête-->
 <header class="header">
@@ -20,7 +20,7 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
         <div class="row">
             <div class="col-3 col-md-2">
                 <a href="index.php">
-                    <img src="festiplan/static/images/logo_noir.png" alt="Logo Festiplan" class="logo-festiplan">
+                    <img src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/images/logo_noir.png" alt="Logo Festiplan" class="logo-festiplan">
                 </a>
             </div>
             <div class="col-8">
@@ -29,7 +29,7 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
             <div class="col-1 col-md-2 text-right">
                 <!-- Icône utilisateur avec menu déroulant -->
                 <div class="dropdown">
-                    <span class="fas fa-solid fa-user dropdown-btn iconeBlanc icone-user"></span>
+                    <span class="fa fa-solid fa-user dropdown-btn iconeBlanc icone-user"></span>
                     <div class="dropdown-content">
                         <a href="?controller=UtilisateurCompte&action=pageProfil">Profil</a>
                         <a href="?controller=UtilisateurCompte&action=pageModifierProfil">Modifier Profil</a>
@@ -164,6 +164,6 @@ if (!isset($_SESSION['utilisateur_connecte']) || $_SESSION['utilisateur_connecte
             </div>
         </div>
     </div>
-    <script src="festiplan/js/script.js"></script>
+    <script src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/js/script.js"></script>
 </body>
 </html>

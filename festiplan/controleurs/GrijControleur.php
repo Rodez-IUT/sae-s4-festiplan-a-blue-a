@@ -34,7 +34,7 @@ class GrijControleur
      */
     public function index(PDO $pdo)
     {
-        $idFestival = HttpHelper::getParam('idFestival');
+        $idFestival = htmlspecialchars(HttpHelper::getParam('idFestival'));
 
         $vue = new View('vues/vue_parametres_grij');
         $message = null;
@@ -60,10 +60,10 @@ class GrijControleur
     {
         $message = null;
         // Récupération des données du lien.
-        $idFestival = HttpHelper::getParam('idFestival');
-        $heureDebut = HttpHelper::getParam('heureDebut');
-        $heureFin = HttpHelper::getParam('heureFin');
-        $ecartEntreSpectacles =HttpHelper::getParam('ecartEntreSpectacles');
+        $idFestival = htmlspecialchars(HttpHelper::getParam('idFestival'));
+        $heureDebut = htmlspecialchars(HttpHelper::getParam('heureDebut'));
+        $heureFin = htmlspecialchars(HttpHelper::getParam('heureFin'));
+        $ecartEntreSpectacles =htmlspecialchars(HttpHelper::getParam('ecartEntreSpectacles'));
 
         // Vérification de la cohérence des données.
         if ($heureDebut == null || $heureFin == null || $ecartEntreSpectacles == null){
@@ -238,8 +238,8 @@ class GrijControleur
     public function profilSpectacleJour(PDO $pdo)
     {
         $message = null;
-        $idFestival = HttpHelper::getParam('idFestival');
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idFestival = htmlspecialchars(HttpHelper::getParam('idFestival'));
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
         $listeScenes = $this->grijModele->recupererListeScenes($pdo,$idFestival, $idSpectacle);
         $infosSpectacle = $this->grijModele->recupererProfilSpectacle($pdo, $idFestival, $idSpectacle);

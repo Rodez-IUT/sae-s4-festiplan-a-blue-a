@@ -26,8 +26,8 @@ class UtilisateurCompteControleur
 
     public function connexion($pdo) {
         $verifLoginOuMdp = true;
-        $login = HttpHelper::getParam('login');
-        $mdp = HttpHelper::getParam('mdp');
+        $login = htmlspecialchars(HttpHelper::getParam('login'));
+        $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
         $searchStmt = $this->userModele->trouverCompteUtilisateurParLoginMdp($pdo, $login, $mdp);
         $user = $searchStmt->fetch();
         if (!$user){
@@ -84,12 +84,12 @@ class UtilisateurCompteControleur
 
     public function creerCompteUtilisateur(PDO $pdo) {
 
-        $nom = HttpHelper::getParam('nom');
-        $prenom = HttpHelper::getParam('prenom');
-        $email = HttpHelper::getParam('email');
-        $login = HttpHelper::getParam('login');
-        $mdp = HttpHelper::getParam('mdp');
-        $confirmMdp = HttpHelper::getParam('confirmMdp');
+        $nom = htmlspecialchars(HttpHelper::getParam('nom'));
+        $prenom = htmlspecialchars(HttpHelper::getParam('prenom'));
+        $email = htmlspecialchars(HttpHelper::getParam('email'));
+        $login = htmlspecialchars(HttpHelper::getParam('login'));
+        $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
+        $confirmMdp = htmlspecialchars(HttpHelper::getParam('confirmMdp'));
 
         $verifNom = (strlen($nom) <= 35);
         $verifPrenom = (strlen($prenom) <= 30);
@@ -176,8 +176,8 @@ class UtilisateurCompteControleur
 
     public function supprimerProfil(PDO $pdo) {
         session_start();
-        $login = HttpHelper::getParam('login');
-        $mdp = HttpHelper::getParam('mdp');
+        $login = htmlspecialchars(HttpHelper::getParam('login'));
+        $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
         $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
         $utilisateur = $utilisateur->fetch();
         if ($login === $utilisateur['login'] && $mdp == $utilisateur['mdp']) {
@@ -212,13 +212,13 @@ class UtilisateurCompteControleur
     }
 
     public function modifierCompteUtilisateur(PDO $pdo) {
-        $nom = HttpHelper::getParam('nom');
-        $prenom = HttpHelper::getParam('prenom');
-        $login = HttpHelper::getParam('login');
-        $mdp = HttpHelper::getParam('mdp');
-        $confirmMdp = HttpHelper::getParam('confirmMdp');
-        $email = HttpHelper::getParam('email');
-        $ancienMdp = HttpHelper::getParam('ancienMdp');
+        $nom = htmlspecialchars(HttpHelper::getParam('nom'));
+        $prenom = htmlspecialchars(HttpHelper::getParam('prenom'));
+        $login = htmlspecialchars(HttpHelper::getParam('login'));
+        $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
+        $confirmMdp = htmlspecialchars(HttpHelper::getParam('confirmMdp'));
+        $email = htmlspecialchars(HttpHelper::getParam('email'));
+        $ancienMdp = htmlspecialchars(HttpHelper::getParam('ancienMdp'));
 
         // Initialisez les variables à true
         $verifNom = true;

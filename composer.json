@@ -1,7 +1,7 @@
 {
   "name": "yasmf/festiplan",
   "config": {
-    "vendor-dir": "festiplan/lib/vendor"
+    "vendor-dir": "/festiplan/lib/vendor"
   },
   "repositories": [
     {
@@ -11,16 +11,18 @@
   ],
   "autoload": {
     "psr-4": {
-      "controleurs\\": "festiplan/controleurs",
-      "modeles\\": "festiplan/modeles",
-      "application\\": "festiplan/application"
+      "controleurs\\": "/festiplan/controleurs",
+      "modeles\\": "/festiplan/modeles",
+      "application\\": "/festiplan/application"
     }
   },
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.0",
     "phpunit/phpunit": "10.0.*",
-    "phpstan/phpstan": "1.10.*",
     "ext-pdo": "*",
     "yasmf/yasmf": ">=1.6.1"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "*"
   }
 }

@@ -10,15 +10,15 @@ if (isset($_SESSION['utilisateur_connecte'])) {
 <head>
     <meta charset="utf-8">
     <title>Page de Connexion</title>
-    <link href="festiplan/static/bootstrap-4.6.2-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="festiplan/static/css/index.css"/>
-    <link href="festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
+    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/bootstrap-5.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/css/index.css"/>
+    <link href="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/fontawesome-free-6.2.1-web/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container centreVertical">
         <div class="cadreUtilisateur connexion">
             <form action="index.php" method="post">
-                <img src="festiplan/static/images/logo_blanc.png" alt="Festiplan Logo">
+                <img src="<?php PREFIX_TO_RELATIVE_PATH ?>/festiplan/static/images/logo_blanc.png" alt="Festiplan Logo">
                 <br><br>
                 <h2 class="grand">Connexion</h2>
                 <br>

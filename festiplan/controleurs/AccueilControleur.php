@@ -10,6 +10,10 @@ use modeles\FestivalModele;
 
 class AccueilControleur {
 
+    private $spectacleModele;
+
+    private $festivalModele;
+
 
     public function __construct(SpectacleModele $spectacleModele, FestivalModele $festivalModele) {
         $this->spectacleModele = $spectacleModele;

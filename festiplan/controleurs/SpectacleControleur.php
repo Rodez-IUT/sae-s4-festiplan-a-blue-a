@@ -47,15 +47,15 @@ class SpectacleControleur {
     {   
         session_start();
         //Récupère tous les paramètres d'un spectacle
-        $titre = HttpHelper::getParam('titre');
-        $description = HttpHelper::getParam('description');
-        $duree = HttpHelper::getParam('duree');
-        $categorie = HttpHelper::getParam('categorie');
-        $taille = HttpHelper::getParam('taille');
+        $titre = htmlspecialchars(HttpHelper::getParam('titre'));
+        $description = htmlspecialchars(HttpHelper::getParam('description'));
+        $duree = htmlspecialchars(HttpHelper::getParam('duree'));
+        $categorie = htmlspecialchars(HttpHelper::getParam('categorie'));
+        $taille = htmlspecialchars(HttpHelper::getParam('taille'));
         $illustration = 'aaa';
 
         // Récupere true si on modifier un spectalce, false si on en créer un
-        $modifier = HttpHelper::getParam('modifier');
+        $modifier = htmlspecialchars(HttpHelper::getParam('modifier'));
 
         $verifTitre = false;
         $verifDesc = false;
@@ -90,7 +90,7 @@ class SpectacleControleur {
             $idUtilisateur = $_SESSION['id_utilisateur'];
             // Insere ce spectacle dans la base de données ou le modifie selon la valeur de $modifier
             if ($modifier == 'true') {
-                $idSpectacle = HttpHelper::getParam('idSpectacle');
+                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
                 $modif = $this->spectacleModele->modifspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idSpectacle);
             } else {
                 $search = $this->spectacleModele->insertionspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idUtilisateur);
@@ -128,7 +128,7 @@ class SpectacleControleur {
         session_start();
 
         $idOrganisateur = $_SESSION['id_utilisateur'];
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
         // Recupere les données du spectacle séléctionné
         $spectacleAModifier = $this->spectacleModele->leSpectacle($pdo,$idSpectacle);
@@ -157,7 +157,7 @@ class SpectacleControleur {
 
     public function supprimerSpectacle(PDO $pdo) : View {
         session_start();
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
         $idUtilisateur = $_SESSION['id_utilisateur'];
         
         // Supprime le festival de la base de données
@@ -186,7 +186,7 @@ class SpectacleControleur {
 
     public function ajouterIntervenant(PDO $pdo) : View {
         $existePas = false;
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
         // Recupere les données de la liste des métiers des intervenants
         $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
         $vue = new View("vues/vue_ajouter_intervenant");
@@ -197,8 +197,8 @@ class SpectacleControleur {
     }
     
     public function modifierIntervenant(PDO $pdo) : View {
-        $idIntervenant = HttpHelper::getParam('idIntervenant');
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
         $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
         // Recupere les données de la liste des métiers des intervenants
@@ -219,15 +219,15 @@ class SpectacleControleur {
 
     public function nouveauIntervenant(PDO $pdo) : View {
         //Récupère tous les paramètres d'un intervenant
-        $nom = HttpHelper::getParam('nom');
-        $prenom = HttpHelper::getParam('prenom');
-        $mail = HttpHelper::getParam('email');
-        $surScene = HttpHelper::getParam('categorieIntervenant');
-        $typeIntervenant = HttpHelper::getParam('metierIntervenant');
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
-        $idIntervenant = HttpHelper::getParam('idIntervenant');
+        $nom = htmlspecialchars(HttpHelper::getParam('nom'));
+        $prenom = htmlspecialchars(HttpHelper::getParam('prenom'));
+        $mail = htmlspecialchars(HttpHelper::getParam('email'));
+        $surScene = htmlspecialchars(HttpHelper::getParam('categorieIntervenant'));
+        $typeIntervenant = htmlspecialchars(HttpHelper::getParam('metierIntervenant'));
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
+        $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
         // Récupere true si on modifier un intervenant
-        $modifier = HttpHelper::getParam('modifier');
+        $modifier = htmlspecialchars(HttpHelper::getParam('modifier'));
         if ($modifier == 'true') {
             $existePas = $this->spectacleModele->existeIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
             if (!$existePas) {
@@ -240,8 +240,8 @@ class SpectacleControleur {
                 return $vue;
             } else {
                 // Raffiche la page de modification
-                $idIntervenant = HttpHelper::getParam('idIntervenant');
-                $idSpectacle = HttpHelper::getParam('idSpectacle');
+                $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
+                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
                 $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
                 // Recupere les données de la liste des métiers des intervenants
                 $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
@@ -270,7 +270,7 @@ class SpectacleControleur {
                 $vue->setVar("search_stmt",$search_stmt);
                 return $vue;
             } else {
-                $idSpectacle = HttpHelper::getParam('idSpectacle');
+                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
                 // Recupere les données de la liste des métiers des intervenants
                 $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
                 $vue = new View("vues/vue_ajouter_intervenant");
@@ -285,7 +285,7 @@ class SpectacleControleur {
     }
     
     public function afficherIntervenant(PDO $pdo) {
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
         //Renvoie le nom prénom et métier de notre intervenant
         $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
@@ -298,8 +298,8 @@ class SpectacleControleur {
 
     public function supprimerIntervenant(PDO $pdo)
     {
-        $idSpectacle = HttpHelper::getParam('idSpectacle');
-        $idIntervenant = HttpHelper::getParam('idIntervenant');
+        $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
+        $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
         
         $this->spectacleModele->supprimerIntervenant($pdo, $idIntervenant);
 
