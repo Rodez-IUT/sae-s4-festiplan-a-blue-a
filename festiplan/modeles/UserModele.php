@@ -18,7 +18,7 @@ class UserModele
      */
     public function trouverCompteUtilisateurParLoginMdp(PDO $pdo, $login, $mdp)
     {
-        $sql = "SELECT idUtilisateur FROM Utilisateur WHERE login = ? AND mdp = ?";
+        $sql = "SELECT idUtilisateur FROM utilisateur WHERE login = ? AND mdp = ?";
         $searchStmt = $pdo->prepare($sql);
         $searchStmt->execute([$login, $mdp]);
         return $searchStmt;
@@ -41,7 +41,7 @@ class UserModele
             // Début de la transaction
             $pdo->beginTransaction();
             // Requête d'insertion
-            $sql = "INSERT INTO Utilisateur (login, mdp, nom, prenom, mail) VALUES (?,?,?,?,?)";
+            $sql = "INSERT INTO utilisateur (login, mdp, nom, prenom, mail) VALUES (?,?,?,?,?)";
             $searchStmt = $pdo->prepare($sql);
             $searchStmt->execute([$login, $mdp, $nom, $prenom, $email]);
         
@@ -56,7 +56,7 @@ class UserModele
 
     // Fonction pour vérifier si l'email existe déjà
     function emailExisteDeja($pdo, $email) {
-        $sql = "SELECT COUNT(*) FROM Utilisateur WHERE mail = ?";
+        $sql = "SELECT COUNT(*) FROM utilisateur WHERE mail = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$email]);
         $count = $stmt->fetchColumn();
@@ -65,7 +65,7 @@ class UserModele
 
     // Fonction pour vérifier si le login existe déjà
     function loginExisteDeja($pdo, $login) {
-        $sql = "SELECT COUNT(*) FROM Utilisateur WHERE login = ?";
+        $sql = "SELECT COUNT(*) FROM utilisateur WHERE login = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$login]);
         $count = $stmt->fetchColumn();
@@ -80,11 +80,11 @@ class UserModele
             
             // Requête de mise à jour
             if ($mdp !== null && $mdp !== "" && strlen($mdp) !== 0) {
-                $sql = "UPDATE Utilisateur SET mdp = ?, nom = ?, prenom = ?, login = ?, mail = ? WHERE idUtilisateur = ?";
+                $sql = "UPDATE utilisateur SET mdp = ?, nom = ?, prenom = ?, login = ?, mail = ? WHERE idUtilisateur = ?";
                 $updateStmt = $pdo->prepare($sql);
                 $updateStmt->execute([$mdp, $nom, $prenom, $login, $email, $_SESSION['id_utilisateur']]);
             } else {
-                $sql = "UPDATE Utilisateur SET nom = ?, prenom = ?, login = ?, mail = ? WHERE idUtilisateur = ?";
+                $sql = "UPDATE utilisateur SET nom = ?, prenom = ?, login = ?, mail = ? WHERE idUtilisateur = ?";
                 $updateStmt = $pdo->prepare($sql);
                 $updateStmt->execute([$nom, $prenom, $login, $email, $_SESSION['id_utilisateur']]);
             }
@@ -100,7 +100,7 @@ class UserModele
     }
 
     public function recupererInformationsProfil(PDO $pdo, $id) {            
-        $sql = "SELECT login, nom, prenom, mail, mdp FROM Utilisateur WHERE idUtilisateur = ?";
+        $sql = "SELECT login, nom, prenom, mail, mdp FROM utilisateur WHERE idUtilisateur = ?";
         $searchStmt = $pdo->prepare($sql);
         $searchStmt->execute([$id]);
         return $searchStmt;
@@ -108,51 +108,51 @@ class UserModele
     
     public function supprimerCompteUtilisateur(PDO $pdo, $idUtilisateur) {
         // Supprimer de EquipeOrganisatrice
-        $sqlUn = "DELETE FROM EquipeOrganisatrice WHERE idUtilisateur = ?";
+        $sqlUn = "DELETE FROM equipeorganisatrice WHERE idUtilisateur = ?";
         $deleteStmtUn = $pdo->prepare($sqlUn);
         $deleteStmtUn->execute([$idUtilisateur]);
     
         // Supprimer de SpectacleOrganisateur
-        $sqlDeux = "DELETE FROM SpectacleOrganisateur WHERE idUtilisateur = ?";
+        $sqlDeux = "DELETE FROM spectacleorganisateur WHERE idUtilisateur = ?";
         $deleteStmtDeux = $pdo->prepare($sqlDeux);
         $deleteStmtDeux->execute([$idUtilisateur]);
     
         // Supprimer de SpectacleDeFestival
-        $sqlQuatre = "DELETE FROM SpectacleDeFestival WHERE idSpectacle IN (SELECT idSpectacle FROM SpectacleOrganisateur WHERE idUtilisateur = ?)";
+        $sqlQuatre = "DELETE FROM spectacledefestival WHERE idSpectacle IN (SELECT idSpectacle FROM spectacleorganisateur WHERE idUtilisateur = ?)";
         $deleteStmtQuatre = $pdo->prepare($sqlQuatre);
         $deleteStmtQuatre->execute([$idUtilisateur]);
     
         // Supprimer de SpectaclesJour
-        $sqlCinq = "DELETE FROM SpectaclesJour WHERE idSpectacle IN (SELECT idSpectacle FROM SpectacleOrganisateur WHERE idUtilisateur = ?)";
+        $sqlCinq = "DELETE FROM spectaclesjour WHERE idSpectacle IN (SELECT idSpectacle FROM spectacleorganisateur WHERE idUtilisateur = ?)";
         $deleteStmtCinq = $pdo->prepare($sqlCinq);
         $deleteStmtCinq->execute([$idUtilisateur]);
 
         // Supprimer de Jour
-        $sqlNeuf = "DELETE FROM Jour WHERE idJour NOT IN (SELECT idJour FROM SpectaclesJour)";
+        $sqlNeuf = "DELETE FROM jour WHERE idJour NOT IN (SELECT idJour FROM spectaclesjour)";
         $deleteStmtNeuf = $pdo->prepare($sqlNeuf);
         $deleteStmtNeuf->execute();
 
         // Supprimer de Grij
-        $sqlHuit = "DELETE FROM Grij WHERE idGrij NOT IN (SELECT idGrij FROM Jour)";
+        $sqlHuit = "DELETE FROM grij WHERE idGrij NOT IN (SELECT idGrij FROM jour)";
         $deleteStmtHuit = $pdo->prepare($sqlHuit);
         $deleteStmtHuit->execute();
 
         // Supprimer de Festival (où l'utilisateur est responsable)
-        $sqlSix = "DELETE FROM Festival WHERE idFestival IN (SELECT idFestival FROM EquipeOrganisatrice WHERE idUtilisateur = ? AND responsable = 1)";
+        $sqlSix = "DELETE FROM festival WHERE idFestival IN (SELECT idFestival FROM equipeorganisatrice WHERE idUtilisateur = ? AND responsable = 1)";
         $deleteStmtSix = $pdo->prepare($sqlSix);
         $deleteStmtSix->execute([$idUtilisateur]);
 
         // Supprimer de Spectacle (de l'utilisateur)
-        $sqlOnze = "DELETE FROM Spectacle WHERE idSpectacle IN (SELECT idSpectacle FROM SpectacleOrganisateur WHERE idUtilisateur = ?)";
+        $sqlOnze = "DELETE FROM spectacle WHERE idSpectacle IN (SELECT idSpectacle FROM spectacleorganisateur WHERE idUtilisateur = ?)";
         $deleteStmtOnze = $pdo->prepare($sqlOnze);
         $deleteStmtOnze->execute([$idUtilisateur]);
     
         // Supprimer de Utilisateur
-        $sqlDix = "DELETE FROM Utilisateur WHERE idUtilisateur = ?";
+        $sqlDix = "DELETE FROM utilisateur WHERE idUtilisateur = ?";
         $deleteStmtDix = $pdo->prepare($sqlDix);
         $deleteStmtDix->execute([$idUtilisateur]);
     
-        return ($deleteStmtUn && $deleteStmtDeux && $deleteStmtTrois && $deleteStmtQuatre && $deleteStmtCinq && $deleteStmtSix && $deleteStmtSept && $deleteStmtHuit && $deleteStmtNeuf && $deleteStmtDix);
+        return ($deleteStmtUn && $deleteStmtDeux && $deleteStmtQuatre && $deleteStmtCinq && $deleteStmtSix && $deleteStmtHuit && $deleteStmtNeuf && $deleteStmtDix);
     }
     
     

@@ -14,7 +14,7 @@ class FestivalModele
      */
     public function listeCategorieFestival(PDO $pdo)
     {
-        $sql = "SELECT * FROM CategorieFestival ";
+        $sql = "SELECT * FROM categoriefestival ";
         $searchStmt = $pdo->prepare($sql);
         $searchStmt->execute();
         return $searchStmt;
@@ -33,7 +33,7 @@ class FestivalModele
      */
     public function insertionFestival(PDO $pdo, $nom, $description, $dateDebut, $dateFin, $categorie, $illustration, $idOrganisateur)
     {
-        $sql = "INSERT INTO Festival (titre,categorie,description,dateDebut,dateFin,illustration) VALUES (:leNom,:laCate,:laDesc,:leDeb,:laFin,:lIllu)";
+        $sql = "INSERT INTO festival (titre,categorie,description,dateDebut,dateFin,illustration) VALUES (:leNom,:laCate,:laDesc,:leDeb,:laFin,:lIllu)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(":leNom", $nom);
         $stmt->bindParam(":laCate", $categorie);
@@ -47,7 +47,7 @@ class FestivalModele
         $responsable = true;
         $idFestival = $pdo->lastInsertId();
 
-        $sql2 = "INSERT INTO EquipeOrganisatrice (idUtilisateur, idFestival, responsable) VALUES (:idOrg,:idFestival,:responsable)";
+        $sql2 = "INSERT INTO equipeorganisatrice (idUtilisateur, idFestival, responsable) VALUES (:idOrg,:idFestival,:responsable)";
         $stmt2 = $pdo->prepare($sql2);
         $stmt2->bindParam(":idOrg", $idOrganisateur);
         $stmt2->bindParam(":idFestival", $idFestival);
@@ -63,7 +63,7 @@ class FestivalModele
      */
     public function nombreMesFestivals(PDO $pdo, $idOrganisateur)
     {
-        $sql = "SELECT Count(Festival.idFestival) AS nbFestival FROM Festival JOIN EquipeOrganisatrice ON Festival.idFestival=EquipeOrganisatrice.idFestival JOIN Utilisateur ON Utilisateur.idUtilisateur=EquipeOrganisatrice.idUtilisateur WHERE EquipeOrganisatrice.idUtilisateur = :id";
+        $sql = "SELECT Count(festival.idFestival) AS nbFestival FROM festival JOIN equipeorganisatrice ON festival.idFestival=equipeorganisatrice.idFestival JOIN utilisateur ON utilisateur.idUtilisateur=equipeorganisatrice.idUtilisateur WHERE equipeorganisatrice.idUtilisateur = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idOrganisateur);
         $stmt->execute();
@@ -84,7 +84,7 @@ class FestivalModele
      */
     public function listeMesFestivals(PDO $pdo, $idOrganisateur, $premier)
     {
-        $sql = "SELECT Festival.titre,Utilisateur.nom,Festival.idFestival,Festival.illustration,EquipeOrganisatrice.responsable FROM Festival JOIN EquipeOrganisatrice ON Festival.idFestival=EquipeOrganisatrice.idFestival JOIN Utilisateur ON Utilisateur.idUtilisateur=EquipeOrganisatrice.idUtilisateur WHERE EquipeOrganisatrice.idUtilisateur = :id LIMIT 4 OFFSET :nPage";
+        $sql = "SELECT festival.titre,utilisateur.nom,festival.idFestival,festival.illustration,equipeorganisatrice.responsable FROM festival JOIN equipeorganisatrice ON festival.idFestival=equipeorganisatrice.idFestival JOIN utilisateur ON utilisateur.idUtilisateur=equipeorganisatrice.idUtilisateur WHERE equipeorganisatrice.idUtilisateur = :id LIMIT 4 OFFSET :nPage";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idOrganisateur);
         $stmt->bindParam("nPage",$premier,PDO::PARAM_INT);
@@ -100,7 +100,7 @@ class FestivalModele
      */
     public function listeLesResponsables(PDO $pdo)
     {
-        $sql = "SELECT Utilisateur.nom,EquipeOrganisatrice.idFestival FROM EquipeOrganisatrice JOIN Utilisateur ON Utilisateur.idUtilisateur=EquipeOrganisatrice.idUtilisateur WHERE EquipeOrganisatrice.responsable = true";
+        $sql = "SELECT utilisateur.nom,equipeorganisatrice.idFestival FROM equipeorganisatrice JOIN utilisateur ON utilisateur.idUtilisateur=equipeorganisatrice.idUtilisateur WHERE equipeorganisatrice.responsable = true";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         return $stmt;
@@ -115,7 +115,7 @@ class FestivalModele
      */
     public function leFestival(PDO $pdo, $idFestival)
     {
-        $sql = "SELECT * FROM Festival WHERE idFestival = :id";
+        $sql = "SELECT * FROM festival WHERE idFestival = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idFestival);
         $stmt->execute();
@@ -140,7 +140,7 @@ class FestivalModele
         try {
             // Début de la transaction
             $pdo->beginTransaction();
-            $sql = "UPDATE Festival SET titre =:leNom, categorie =:laCate, description =:laDesc, dateDebut =:leDeb, dateFin =:laFin, illustration=:lIllu WHERE idFestival =:id";
+            $sql = "UPDATE festival SET titre =:leNom, categorie =:laCate, description =:laDesc, dateDebut =:leDeb, dateFin =:laFin, illustration=:lIllu WHERE idFestival =:id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam("leNom",$nom);
             $stmt->bindParam("laCate",$categorie);
@@ -166,11 +166,11 @@ class FestivalModele
      */
     public function supprimerFestival(PDO $pdo, $idFestival)
     {   
-        $sql = "DELETE FROM EquipeOrganisatrice WHERE idFestival = :id";
+        $sql = "DELETE FROM equipeorganisatrice WHERE idFestival = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idFestival);
         $stmt->execute();
-        $sql2 = "DELETE FROM Festival WHERE idFestival = :id";
+        $sql2 = "DELETE FROM festival WHERE idFestival = :id";
         $stmt2 = $pdo->prepare($sql2);
         $stmt2->bindParam("id",$idFestival);
         $stmt2->execute();
@@ -184,7 +184,7 @@ class FestivalModele
      */
     public function estResponsable($pdo,$idFestival,$idOrganisateur)
     {
-        $sql = "SELECT responsable FROM EquipeOrganisatrice WHERE idFestival =:idFestival AND idUtilisateur =:idUtilisateur";
+        $sql = "SELECT responsable FROM equipeorganisatrice WHERE idFestival =:idFestival AND idUtilisateur =:idUtilisateur";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("idFestival",$idFestival);
         $stmt->bindParam("idUtilisateur",$idOrganisateur);
@@ -200,7 +200,7 @@ class FestivalModele
      */
     public function listeOrganisateurFestival($pdo,$idFestival) 
     {
-        $sql = "SELECT Utilisateur.idUtilisateur,Utilisateur.nom,Utilisateur.prenom FROM Utilisateur JOIN EquipeOrganisatrice ON Utilisateur.idUtilisateur=EquipeOrganisatrice.idUtilisateur AND idFestival =:idFestival";
+        $sql = "SELECT utilisateur.idUtilisateur,utilisateur.nom,utilisateur.prenom FROM utilisateur JOIN equipeorganisatrice ON utilisateur.idUtilisateur=equipeorganisatrice.idUtilisateur AND idFestival =:idFestival";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("idFestival",$idFestival);
         $stmt->execute();
@@ -213,7 +213,7 @@ class FestivalModele
      */
     public function listeUtilisateur($pdo) 
     {
-        $sql = "SELECT idUtilisateur,nom,prenom FROM Utilisateur";
+        $sql = "SELECT idUtilisateur,nom,prenom FROM utilisateur";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         return $stmt;
@@ -226,7 +226,7 @@ class FestivalModele
      */
     public function supprimerOrganisateurs($pdo,$idFestival) 
     {
-        $sql = "DELETE FROM EquipeOrganisatrice WHERE idFestival = :id AND responsable = false ";
+        $sql = "DELETE FROM equipeorganisatrice WHERE idFestival = :id AND responsable = false ";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idFestival);
         $stmt->execute();
@@ -238,7 +238,7 @@ class FestivalModele
      */
     public function majOrganisateur($pdo,$idFestival,$utilisateur) 
     {
-        $sql = "INSERT INTO EquipeOrganisatrice (idUtilisateur, idFestival) VALUES (:idOrg,:idFestival)";
+        $sql = "INSERT INTO equipeorganisatrice (idUtilisateur, idFestival) VALUES (:idOrg,:idFestival)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("idOrg",$utilisateur);
         $stmt->bindParam("idFestival",$idFestival);
@@ -251,7 +251,7 @@ class FestivalModele
      */
     public function supprimerSpectacleDeFestival ($pdo,$idFestival, $idSpectacle) 
     {
-        $sql = "DELETE FROM SpectacleDeFestival WHERE idFestival = :idFestival AND idSpectacle = :idSpectacle";
+        $sql = "DELETE FROM spectacledefestival WHERE idFestival = :idFestival AND idSpectacle = :idSpectacle";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("idFestival",$idFestival);
         $stmt->bindParam("idSpectacle",$idSpectacle);
@@ -264,7 +264,7 @@ class FestivalModele
      */
     public function majSpectacleDeFestival ($pdo,$idFestival,$idSpectacle) 
     {
-        $sql = "INSERT INTO SpectacleDeFestival (idSpectacle, idFestival) VALUES (:idSpectacle,:idFestival)";
+        $sql = "INSERT INTO spectacledefestival (idSpectacle, idFestival) VALUES (:idSpectacle,:idFestival)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("idSpectacle",$idSpectacle);
         $stmt->bindParam("idFestival",$idFestival);
@@ -278,7 +278,7 @@ class FestivalModele
      */
     public function listeSpectacleDeFestival($pdo,$idFestival) 
     {
-        $sql = "SELECT idSpectacle FROM SpectacleDeFestival WHERE idFestival = :id ";
+        $sql = "SELECT idSpectacle FROM spectacledefestival WHERE idFestival = :id ";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idFestival);
         $stmt->execute();
