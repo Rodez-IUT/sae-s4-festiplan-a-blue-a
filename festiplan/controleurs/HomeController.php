@@ -23,7 +23,7 @@ class HomeController {
         // Vérifier si l'utilisateur est connecté
         session_start();
         if (isset($_SESSION['utilisateur_connecte']) && $_SESSION['utilisateur_connecte'] === true) {
-            $afficher = (bool)htmlspecialchars(HttpHelper::getParam('afficher'));
+            $afficher = (bool)htmlspecialchars(HttpHelper::getParam('afficher') ?? false);
             // Affiche la bonne page dans le cas ou on veut les festival
             if (!$afficher) {
                 $idUtilisateur = $_SESSION['id_utilisateur'];

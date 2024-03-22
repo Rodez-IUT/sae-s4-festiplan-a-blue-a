@@ -111,7 +111,7 @@ class SpectacleModele
      */
     public function nombreMesSpectacles(PDO $pdo, $idOrganisateur) 
     {
-        $sql = "SELECT Count(Spectacle.idSpectacle) AS nbSpectacle FROM spectacle JOIN spectacleorganisateur ON Spectacle.idSpectacle=SpectacleOrganisateur.idSpectacle JOIN utilisateur ON utilisateur.idUtilisateur=spectacleorganisateur.idUtilisateur WHERE spectacleorganisateur.idUtilisateur = :id";
+        $sql = "SELECT Count(spectacle.idSpectacle) AS nbSpectacle FROM spectacle JOIN spectacleorganisateur ON spectacle.idSpectacle=SpectacleOrganisateur.idSpectacle JOIN utilisateur ON utilisateur.idUtilisateur=spectacleorganisateur.idUtilisateur WHERE spectacleorganisateur.idUtilisateur = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam("id",$idOrganisateur);
         $stmt->execute();
