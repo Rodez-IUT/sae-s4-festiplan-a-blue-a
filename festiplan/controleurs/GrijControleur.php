@@ -38,16 +38,21 @@ class GrijControleur
 
         $vue = new View('vues/vue_parametres_grij');
         $message = null;
-        $stmt = $this->grijModele->recupererParametresGrij($pdo, $idFestival);
-        $row = $stmt->fetch();
-        if ($row) {
-            $vue->setVar('heureDebut', $row['heureDebut']);
-            $vue->setVar('heureFin', $row['heureFin']);
-            $vue->setVar('ecartEntreSpectacles', $row['tempsEntreSpectacle']);
-        }
+        try {
+            $stmt = $this->grijModele->recupererParametresGrij($pdo, $idFestival);
+            $row = $stmt->fetch();
+            if ($row) {
+                $vue->setVar('heureDebut', $row['heureDebut']);
+                $vue->setVar('heureFin', $row['heureFin']);
+                $vue->setVar('ecartEntreSpectacles', $row['tempsEntreSpectacle']);
+            }
 
-        $vue->setVar('message', $message);
-        $vue->setVar('idFestival', $idFestival);
+            $vue->setVar('message', $message);
+            $vue->setVar('idFestival', $idFestival);
+        } catch (\PDOException $e) {
+            $vue = new View('vues/vue_erreur');
+            $vue->setVar('message', "Erreur avec la base de données.");
+        }
         return $vue;
     }
 
@@ -65,55 +70,61 @@ class GrijControleur
         $heureFin = htmlspecialchars(HttpHelper::getParam('heureFin'));
         $ecartEntreSpectacles =htmlspecialchars(HttpHelper::getParam('ecartEntreSpectacles'));
 
-        // Vérification de la cohérence des données.
-        if ($heureDebut == null || $heureFin == null || $ecartEntreSpectacles == null){
-            $vue = new View('vues/vue_parametres_grij');
-            $message = "Vous n'avez pas entré tous les champs";
-            $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
+        try {
+            // Vérification de la cohérence des données.
+            if ($heureDebut == null || $heureFin == null || $ecartEntreSpectacles == null) {
+                $vue = new View('vues/vue_parametres_grij');
+                $message = "Vous n'avez pas entré tous les champs";
+                $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
 
-        } else if (strtotime($heureDebut)> strtotime($heureFin)) {
-            $vue = new View('vues/vue_parametres_grij');
-            $message = "La date de fin est plus petite que celle de début.<br>Il faut entrer une date de fin plus grande";
-            $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
-        
-        } else if ($this->convertirEnMinutes($ecartEntreSpectacles)
-          >= ($this->convertirEnMinutes($heureFin) - $this->convertirEnMinutes($heureDebut))) {
-            $vue = new View('vues/vue_parametres_grij');
-            $message = "L'écart entre les spectacles est supérieur à la durée totale";
-            $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
-        
-        } else {
-            // Si les données sont cohérentes
-            // On modifie la grij
-            $ok = $this->grijModele->modifierCreerGrij($pdo, $idFestival, $heureDebut, $heureFin, $ecartEntreSpectacles);
-            // Si la modification c'est bien effectuter
-            if ($ok){
-                // Récupération des jours du festival
-                $jours = $this->grijModele->recupererJours($pdo, $idFestival);
-                // Récupération des spectacles
-                $spectacles = $this->grijModele->recupererSpectacles($pdo, $idFestival);
-                // création de la grille d'affichage
-                $this->planifierSpectacles($pdo, $idFestival,$spectacles,$heureDebut, $heureFin, $ecartEntreSpectacles, $jours);
+            } else if (strtotime($heureDebut) > strtotime($heureFin)) {
+                $vue = new View('vues/vue_parametres_grij');
+                $message = "La date de fin est plus petite que celle de début.<br>Il faut entrer une date de fin plus grande";
+                $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
 
-                // récupération de la grij
-                $grij = $this->grijModele->recupererGrij($pdo, $idFestival);
-                $spectacleNonPlace = $this->grijModele->recupererSpectacleNonPlace($pdo,$idFestival);
-
-                $vue = new View('vues/vue_consultation_planification');
-                $vue->setVar('listeSpectacleNonPlace', $spectacleNonPlace);
-                $vue->setVar('listeJours', $grij);
+            } else if ($this->convertirEnMinutes($ecartEntreSpectacles)
+                >= ($this->convertirEnMinutes($heureFin) - $this->convertirEnMinutes($heureDebut))) {
+                $vue = new View('vues/vue_parametres_grij');
+                $message = "L'écart entre les spectacles est supérieur à la durée totale";
+                $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
 
             } else {
-                // réaffichage des paramétrage en cas d'erreur
-                $vue = new View('vues/vue_parametres_grij');
-                $message = "Erreur avec la base de données.";
-                $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
+                // Si les données sont cohérentes
+                // On modifie la grij
+                $ok = $this->grijModele->modifierCreerGrij($pdo, $idFestival, $heureDebut, $heureFin, $ecartEntreSpectacles);
+                // Si la modification c'est bien effectuter
+                if ($ok) {
+                    // Récupération des jours du festival
+                    $jours = $this->grijModele->recupererJours($pdo, $idFestival);
+                    // Récupération des spectacles
+                    $spectacles = $this->grijModele->recupererSpectacles($pdo, $idFestival);
+                    // création de la grille d'affichage
+                    $this->planifierSpectacles($pdo, $idFestival, $spectacles, $heureDebut, $heureFin, $ecartEntreSpectacles, $jours);
+
+                    // récupération de la grij
+                    $grij = $this->grijModele->recupererGrij($pdo, $idFestival);
+                    $spectacleNonPlace = $this->grijModele->recupererSpectacleNonPlace($pdo, $idFestival);
+
+                    $vue = new View('vues/vue_consultation_planification');
+                    $vue->setVar('listeSpectacleNonPlace', $spectacleNonPlace);
+                    $vue->setVar('listeJours', $grij);
+
+                } else {
+                    // réaffichage des paramétrage en cas d'erreur
+                    $vue = new View('vues/vue_parametres_grij');
+                    $message = "Erreur avec la base de données.";
+                    $this->initialiseHeuresSelectionnees($vue, $heureDebut, $heureFin, $ecartEntreSpectacles);
+                }
             }
+            $vue->setVar('profilSpectacle', null);
+            $vue->setVar('idFestival', $idFestival);
+            $vue->setVar('message', $message);
+            return $vue;
+        } catch (\PDOException $e) {
+            $vue = new View('vues/vue_erreur');
+            $vue->setVar('message', "Erreur avec la base de données.");
+            return $vue;
         }
-        $vue->setVar('profilSpectacle', null);
-        $vue->setVar('idFestival', $idFestival);
-        $vue->setVar('message', $message);
-        return $vue;
     }
 
     /**
@@ -241,19 +252,24 @@ class GrijControleur
         $idFestival = htmlspecialchars(HttpHelper::getParam('idFestival'));
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
-        $listeScenes = $this->grijModele->recupererListeScenes($pdo,$idFestival, $idSpectacle);
-        $infosSpectacle = $this->grijModele->recupererProfilSpectacle($pdo, $idFestival, $idSpectacle);
-        $grij = $this->grijModele->recupererGrij($pdo, $idFestival);
-        $spectacleNonPlace = $this->grijModele->recupererSpectacleNonPlace($pdo,$idFestival);
+        try {
+            $listeScenes = $this->grijModele->recupererListeScenes($pdo, $idFestival, $idSpectacle);
+            $infosSpectacle = $this->grijModele->recupererProfilSpectacle($pdo, $idFestival, $idSpectacle);
+            $grij = $this->grijModele->recupererGrij($pdo, $idFestival);
+            $spectacleNonPlace = $this->grijModele->recupererSpectacleNonPlace($pdo, $idFestival);
 
-        $vue = new View("vues/vue_consultation_planification");
-        $vue->setVar('idFestival', $idFestival);
-        $vue->setVar('message', $message);
-        $vue->setVar('profilSpectacle', true);
-        $vue->setVar('listeScenes', $listeScenes);
-        $vue->setVar('infosSpectacle', $infosSpectacle);
-        $vue->setVar('listeJours', $grij);
-        $vue->setVar('listeSpectacleNonPlace', $spectacleNonPlace);
+            $vue = new View("vues/vue_consultation_planification");
+            $vue->setVar('idFestival', $idFestival);
+            $vue->setVar('message', $message);
+            $vue->setVar('profilSpectacle', true);
+            $vue->setVar('listeScenes', $listeScenes);
+            $vue->setVar('infosSpectacle', $infosSpectacle);
+            $vue->setVar('listeJours', $grij);
+            $vue->setVar('listeSpectacleNonPlace', $spectacleNonPlace);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar('message', "Erreur avec la base de données.");
+        }
         return $vue;
     }
 

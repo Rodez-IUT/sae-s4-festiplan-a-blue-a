@@ -28,8 +28,16 @@ class UtilisateurCompteControleur
         $verifLoginOuMdp = true;
         $login = htmlspecialchars(HttpHelper::getParam('login'));
         $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
-        $searchStmt = $this->userModele->trouverCompteUtilisateurParLoginMdp($pdo, $login, $mdp);
-        $user = $searchStmt->fetch();
+        try {
+            $searchStmt = $this->userModele->trouverCompteUtilisateurParLoginMdp($pdo, $login, $mdp);
+            $user = $searchStmt->fetch();
+
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la connexion.");
+            return $vue;
+        }
+
         if (!$user){
             $verifLoginOuMdp = false;
             $vue = new View("vues/vue_connexion");
@@ -47,20 +55,26 @@ class UtilisateurCompteControleur
                 $pageActuelle = 1;
             }
 
-            $nbFestival = (int)$this->festivalModele->nombreMesFestivals($pdo,$idUtilisateur);
-            // On calcule le nombre de pages total
-            $nbPages = ceil($nbFestival / 4);
-            // Calcul du 1er element de la page
-            $premier = ($pageActuelle * 4) - 4;
-            $mesFestivals = $this->festivalModele->listeMesFestivals($pdo,$idUtilisateur,$premier);
-            // Recupere le responsable de chaque Festival
-            $lesResponsables = $this->festivalModele->listeLesResponsables($pdo);
+            try {
+                $nbFestival = (int)$this->festivalModele->nombreMesFestivals($pdo, $idUtilisateur);
+                // On calcule le nombre de pages total
+                $nbPages = ceil($nbFestival / 4);
+                // Calcul du 1er element de la page
+                $premier = ($pageActuelle * 4) - 4;
+                $mesFestivals = $this->festivalModele->listeMesFestivals($pdo, $idUtilisateur, $premier);
+                // Recupere le responsable de chaque Festival
+                $lesResponsables = $this->festivalModele->listeLesResponsables($pdo);
 
-            $vue = new View("vues/vue_accueil");
-            $vue->setVar("nbPages", $nbPages);
-            $vue->setVar("afficher", false);
-            $vue->setVar("mesFestivals", $mesFestivals);
-            $vue->setVar("lesResponsables", $lesResponsables);
+                $vue = new View("vues/vue_accueil");
+                $vue->setVar("nbPages", $nbPages);
+                $vue->setVar("afficher", false);
+                $vue->setVar("mesFestivals", $mesFestivals);
+                $vue->setVar("lesResponsables", $lesResponsables);
+            } catch (\PDOException $e) {
+                $vue = new View("vues/vue_erreur");
+                $vue->setVar("message", "Erreur lors de la récupération des festivals.");
+                return $vue;
+            }
             return $vue;
         }
     }
@@ -93,15 +107,29 @@ class UtilisateurCompteControleur
 
         $verifNom = (strlen($nom) <= 35);
         $verifPrenom = (strlen($prenom) <= 30);
-        $verifEmail = (strlen($email) <= 50 && !$this->userModele->emailExisteDeja($pdo, $email));
-        $verifLogin = (strlen($login) <= 35 && !$this->userModele->loginExisteDeja($pdo, $login));
+        try {
+            $verifEmail = (strlen($email) <= 50 && !$this->userModele->emailExisteDeja($pdo, $email));
+            $verifLogin = (strlen($login) <= 35 && !$this->userModele->loginExisteDeja($pdo, $login));
+
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la création du compte utilisateur.");
+            return $vue;
+        }
         $verifMdp = (strlen($mdp) <= 30);
         $verifConfirmMdp = (strlen($confirmMdp) <= 30 && $mdp == $confirmMdp);
 
         try {
             $estOk = $verifConfirmMdp && $verifEmail && $verifLogin && $verifMdp && $verifNom && $verifPrenom;
             if ($estOk) {
-                $searchStmt = $this->userModele->creerCompteUtilisateur($pdo, $login, $mdp, $nom, $prenom, $email);
+                try {
+                    $this->userModele->creerCompteUtilisateur($pdo, $login, $mdp, $nom, $prenom, $email);
+
+                } catch (PDOException $e) {
+                    $vue = new View("vues/vue_erreur");
+                    $vue->setVar("message", "Erreur lors de la création du compte utilisateur.");
+                    return $vue;
+                }
                 $verifLoginOuMdp = true;
                 $vue = new View("vues/vue_connexion");
                 $vue->setVar("loginOuMdpOk", $verifLoginOuMdp);
@@ -134,33 +162,48 @@ class UtilisateurCompteControleur
         $verifEmail = true;
         $verifAncienMdp = true;
         session_start();
-        $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
-        $utilisateur = $utilisateur->fetch();
-        $vue = new View("vues/vue_modifier_profil");
-        $vue->setVar("nomOk", $verifNom);
-        $vue->setVar("ancienNom", $utilisateur['nom']);
-        $vue->setVar("prenomOk", $verifPrenom);
-        $vue->setVar("ancienPrenom", $utilisateur['prenom']);
-        $vue->setVar("loginOk", $verifLogin);
-        $vue->setVar("ancienLogin", $utilisateur['login']);
-        $vue->setVar("emailOk", $verifEmail);
-        $vue->setVar("ancienEmail", $utilisateur['mail']);
-        $vue->setVar("ancienMdpOk", $verifAncienMdp);
-        $vue->setVar("mdpOk", $verifMdp);
-        $vue->setVar("confirmMdpOk", $verifConfirmMdp);
+
+        try {
+            $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
+            $utilisateur = $utilisateur->fetch();
+            $vue = new View("vues/vue_modifier_profil");
+            $vue->setVar("nomOk", $verifNom);
+            $vue->setVar("ancienNom", $utilisateur['nom']);
+            $vue->setVar("prenomOk", $verifPrenom);
+            $vue->setVar("ancienPrenom", $utilisateur['prenom']);
+            $vue->setVar("loginOk", $verifLogin);
+            $vue->setVar("ancienLogin", $utilisateur['login']);
+            $vue->setVar("emailOk", $verifEmail);
+            $vue->setVar("ancienEmail", $utilisateur['mail']);
+            $vue->setVar("ancienMdpOk", $verifAncienMdp);
+            $vue->setVar("mdpOk", $verifMdp);
+            $vue->setVar("confirmMdpOk", $verifConfirmMdp);
+
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la récupération des informations du profil.");
+            return $vue;
+        }
         return $vue;
     }
 
     public function pageProfil(PDO $pdo) {
         session_start();
         $idUtilisateur = $_SESSION['id_utilisateur'];
-        $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $idUtilisateur);
-        $utilisateur = $utilisateur->fetch();
-        $vue = new View("vues/vue_profil");
-        $vue->setVar("ancienNom", $utilisateur['nom']);
-        $vue->setVar("ancienPrenom", $utilisateur['prenom']);
-        $vue->setVar("ancienLogin", $utilisateur['login']);
-        $vue->setVar("ancienEmail", $utilisateur['mail']);
+        try {
+            $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $idUtilisateur);
+            $utilisateur = $utilisateur->fetch();
+            $vue = new View("vues/vue_profil");
+            $vue->setVar("ancienNom", $utilisateur['nom']);
+            $vue->setVar("ancienPrenom", $utilisateur['prenom']);
+            $vue->setVar("ancienLogin", $utilisateur['login']);
+            $vue->setVar("ancienEmail", $utilisateur['mail']);
+
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la récupération des informations du profil.");
+            return $vue;
+        }
         return $vue;
     }
 
@@ -178,11 +221,25 @@ class UtilisateurCompteControleur
         session_start();
         $login = htmlspecialchars(HttpHelper::getParam('login'));
         $mdp = htmlspecialchars(HttpHelper::getParam('mdp'));
-        $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
-        $utilisateur = $utilisateur->fetch();
+        try {
+            $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
+            $utilisateur = $utilisateur->fetch();
+
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la récupération des informations du profil.");
+            return $vue;
+        }
         if ($login === $utilisateur['login'] && $mdp == $utilisateur['mdp']) {
-            $this->userModele->supprimerCompteUtilisateur($pdo, $_SESSION['id_utilisateur']);
-            session_destroy();
+            try {
+                $this->userModele->supprimerCompteUtilisateur($pdo, $_SESSION['id_utilisateur']);
+
+            } catch (\PDOException $e) {
+                session_destroy();
+                $vue = new View("vues/vue_erreur");
+                $vue->setVar("message", "Erreur lors de la suppression du compte utilisateur.");
+                return $vue;
+            }
             $verifLoginOuMdp = true;
             $vue = new View("vues/vue_connexion");
             $vue->setVar("loginOuMdpOk", $verifLoginOuMdp);
@@ -230,8 +287,14 @@ class UtilisateurCompteControleur
         $verifAncienMdp = true;
 
         session_start();
-        $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
-        $utilisateur = $utilisateur->fetch();
+        try {
+            $utilisateur = $this->userModele->recupererInformationsProfil($pdo, $_SESSION['id_utilisateur']);
+            $utilisateur = $utilisateur->fetch();
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la récupération des informations du profil.");
+            return $vue;
+        }
 
         if ($ancienMdp !== $utilisateur['mdp']) {
             $verifAncienMdp = false;
@@ -246,7 +309,14 @@ class UtilisateurCompteControleur
         try {
             $estOk = $verifConfirmMdp && $verifLogin && $verifMdp && $verifNom && $verifPrenom && $verifEmail && $verifAncienMdp;
             if ($estOk) {
-                $searchStmt = $this->userModele->modifierCompteUtilisateur($pdo, $login, $mdp, $nom, $prenom, $email);
+                try {
+                    $this->userModele->modifierCompteUtilisateur($pdo, $login, $mdp, $nom, $prenom, $email);
+
+                } catch (PDOException $e) {
+                    $vue = new View("vues/vue_erreur");
+                    $vue->setVar("message", "Erreur lors de la modification du compte utilisateur.");
+                    return $vue;
+                }
                 return new View("vues/vue_connexion");
                 // a regler
             } else {

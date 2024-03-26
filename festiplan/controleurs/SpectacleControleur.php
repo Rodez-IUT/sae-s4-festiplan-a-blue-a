@@ -28,18 +28,23 @@ class SpectacleControleur {
         $verifCategorie = false;
         $verifTaille = false;
         // Recherche les différentes catégories
-        $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
-        $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
-        $vue = new View("vues/vue_creer_spectacle");
-        $vue->setVar("titreOk", $verifTitre);
-        $vue->setVar("descOk", $verifDesc);
-        $vue->setVar("dureeOk", $verifDuree);
-        $vue->setVar("categorieOk", $verifCategorie);
-        $vue->setVar("tailleOk",$verifTaille);
-        $vue->setVar("ancienneCategorie", " ");
-        $vue->setVar("ancienneTaille", " ");
-        $vue->setVar('searchStmt',$searchStmt);
-        $vue->setVar('search_stmt',$search_stmt);
+        try {
+            $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
+            $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
+            $vue = new View("vues/vue_creer_spectacle");
+            $vue->setVar("titreOk", $verifTitre);
+            $vue->setVar("descOk", $verifDesc);
+            $vue->setVar("dureeOk", $verifDuree);
+            $vue->setVar("categorieOk", $verifCategorie);
+            $vue->setVar("tailleOk", $verifTaille);
+            $vue->setVar("ancienneCategorie", " ");
+            $vue->setVar("ancienneTaille", " ");
+            $vue->setVar('searchStmt', $searchStmt);
+            $vue->setVar('search_stmt', $search_stmt);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la création du spectacle.");
+        }
         return $vue;
     }
 
@@ -83,43 +88,50 @@ class SpectacleControleur {
             $verifCategorie = true;
         }
 
-         // Si toutes les valeurs sont correctes ajoute le spectacle a la base de données
-        if ($verifDuree && $verifDesc && $verifTitre && $verifTaille && $verifCategorie) {
-            
-            // Recupere l'id de l'utilisateur
-            $idUtilisateur = $_SESSION['id_utilisateur'];
-            // Insere ce spectacle dans la base de données ou le modifie selon la valeur de $modifier
-            if ($modifier == 'true') {
-                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
-                $modif = $this->spectacleModele->modifspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idSpectacle);
-            } else {
-                $search = $this->spectacleModele->insertionspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idUtilisateur);
-            }
+        try {
 
-            //Renvoie à l'accueil car quand il va à la pgae connexion il est déjà connecté
-            $vue = new View("vues/vue_connexion");
-            return $vue;
-        } else {
-            // Si des valeurs sont incorectes renvoie lesquels le sont et les valeurs
-            $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
-            $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
-            if ($modifier == 'true') {
-                $vue = new View("vues/vue_modifier_spectacle");
+            // Si toutes les valeurs sont correctes ajoute le spectacle a la base de données
+            if ($verifDuree && $verifDesc && $verifTitre && $verifTaille && $verifCategorie) {
+
+                // Recupere l'id de l'utilisateur
+                $idUtilisateur = $_SESSION['id_utilisateur'];
+                // Insere ce spectacle dans la base de données ou le modifie selon la valeur de $modifier
+                if ($modifier == 'true') {
+                    $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
+                    $modif = $this->spectacleModele->modifspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idSpectacle);
+                } else {
+                    $search = $this->spectacleModele->insertionspectacle($pdo, $titre, $description, $duree, $illustration, $categorie, $taille, $idUtilisateur);
+                }
+
+                //Renvoie à l'accueil car quand il va à la pgae connexion il est déjà connecté
+                $vue = new View("vues/vue_connexion");
+                return $vue;
             } else {
-                $vue = new View("vues/vue_creer_spectacle");
+                // Si des valeurs sont incorectes renvoie lesquels le sont et les valeurs
+                $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
+                $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
+                if ($modifier == 'true') {
+                    $vue = new View("vues/vue_modifier_spectacle");
+                } else {
+                    $vue = new View("vues/vue_creer_spectacle");
+                }
+                $vue->setVar("titreOk", $verifTitre);
+                $vue->setVar("ancienTitre", $titre);
+                $vue->setVar("descOk", $verifDesc);
+                $vue->setVar("ancienneDesc", $description);
+                $vue->setVar("dureeOk", $verifDuree);
+                $vue->setVar("ancienneDuree", $duree);
+                $vue->setVar("categorieOk", $verifCategorie);
+                $vue->setVar("tailleOk", $verifTaille);
+                $vue->setVar("ancienneCategorie", $categorie);
+                $vue->setVar("ancienneTaille", $taille);
+                $vue->setVar('searchStmt', $searchStmt);
+                $vue->setVar('search_stmt', $search_stmt);
+                return $vue;
             }
-            $vue->setVar("titreOk", $verifTitre);
-            $vue->setVar("ancienTitre", $titre);
-            $vue->setVar("descOk", $verifDesc);
-            $vue->setVar("ancienneDesc", $description);
-            $vue->setVar("dureeOk", $verifDuree);
-            $vue->setVar("ancienneDuree", $duree);
-            $vue->setVar("categorieOk", $verifCategorie);
-            $vue->setVar("tailleOk",$verifTaille);
-            $vue->setVar("ancienneCategorie", $categorie);
-            $vue->setVar("ancienneTaille", $taille);
-            $vue->setVar('searchStmt',$searchStmt);
-            $vue->setVar('search_stmt',$search_stmt);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de l'ajout du spectacle.");
             return $vue;
         }
     }
@@ -130,28 +142,33 @@ class SpectacleControleur {
         $idOrganisateur = $_SESSION['id_utilisateur'];
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
-        // Recupere les données du spectacle séléctionné
-        $spectacleAModifier = $this->spectacleModele->leSpectacle($pdo,$idSpectacle);
-        // Recupere les données de la liste des catégorie
-        $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
-        // Recupere les données de la liste des tailles de scènes
-        $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
-        // Mets les données dans la vue
-        $vue = new View("vues/vue_modifier_spectacle");
-        $vue->setVar("titreOk", true);
-        $vue->setVar("ancienTitre", $spectacleAModifier['titre']);
-        $vue->setVar("descOk", true);
-        $vue->setVar("ancienneDesc", $spectacleAModifier['description']);
-        $vue->setVar("dureeOk",true);
-        $vue->setVar("categorieOk", true);
-        $vue->setVar("tailleOk", true);
-        $vue->setVar("ancienneDuree", $spectacleAModifier['duree']);
-        $vue->setVar("ancienneCategorie", $spectacleAModifier['categorie']);
-        $vue->setVar("ancienneTaille", $spectacleAModifier['tailleSceneRequise']);
-        $vue->setVar("idSpectacle", $idSpectacle);
+        try {
+            // Recupere les données du spectacle séléctionné
+            $spectacleAModifier = $this->spectacleModele->leSpectacle($pdo, $idSpectacle);
+            // Recupere les données de la liste des catégorie
+            $searchStmt = $this->spectacleModele->listeCategorieSpectacle($pdo);
+            // Recupere les données de la liste des tailles de scènes
+            $search_stmt = $this->spectacleModele->listeTailleScene($pdo);
+            // Mets les données dans la vue
+            $vue = new View("vues/vue_modifier_spectacle");
+            $vue->setVar("titreOk", true);
+            $vue->setVar("ancienTitre", $spectacleAModifier['titre']);
+            $vue->setVar("descOk", true);
+            $vue->setVar("ancienneDesc", $spectacleAModifier['description']);
+            $vue->setVar("dureeOk", true);
+            $vue->setVar("categorieOk", true);
+            $vue->setVar("tailleOk", true);
+            $vue->setVar("ancienneDuree", $spectacleAModifier['duree']);
+            $vue->setVar("ancienneCategorie", $spectacleAModifier['categorie']);
+            $vue->setVar("ancienneTaille", $spectacleAModifier['tailleSceneRequise']);
+            $vue->setVar("idSpectacle", $idSpectacle);
 
-        $vue->setVar("searchStmt",$searchStmt);
-        $vue->setVar("search_stmt",$search_stmt);
+            $vue->setVar("searchStmt", $searchStmt);
+            $vue->setVar("search_stmt", $search_stmt);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de l'affichage du spectacle.");
+        }
         return $vue;
     }
 
@@ -161,7 +178,13 @@ class SpectacleControleur {
         $idUtilisateur = $_SESSION['id_utilisateur'];
         
         // Supprime le festival de la base de données
-        $supprimerSpectacle = $this->spectacleModele->supprimerSpectacle($pdo, $idSpectacle);
+        try {
+            $this->spectacleModele->supprimerSpectacle($pdo, $idSpectacle);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la suppression du spectacle.");
+            return $vue;
+        }
 
         // On détermine sur quelle page on se trouve
         if(isset($_GET['page']) && !empty($_GET['page'])){
@@ -169,30 +192,39 @@ class SpectacleControleur {
         }else{
             $pageActuelle = 1;
         }
-        $nbSpectacle = (int)$this->spectacleModele->nombreMesSpectacles($pdo,$idUtilisateur);
-        
-        // On calcule le nombre de pages total
-        $nbPagesSpectacle = ceil($nbSpectacle / 4);
-        // Calcul du 1er element de la page
-        $premier = ($pageActuelle * 4) - 4;
-        $mesSpectacles = $this->spectacleModele->listeMesSpectacles($pdo,$idUtilisateur,$premier);
+        try {
+            $nbSpectacle = (int)$this->spectacleModele->nombreMesSpectacles($pdo, $idUtilisateur);
 
-        $vue = new View("vues/vue_accueil");
-        $vue->setVar("afficher", true);
-        $vue->setVar("mesSpectacles", $mesSpectacles);
-        $vue->setVar("nbPages", $nbPagesSpectacle);
+            // On calcule le nombre de pages total
+            $nbPagesSpectacle = ceil($nbSpectacle / 4);
+            // Calcul du 1er element de la page
+            $premier = ($pageActuelle * 4) - 4;
+            $mesSpectacles = $this->spectacleModele->listeMesSpectacles($pdo, $idUtilisateur, $premier);
+
+            $vue = new View("vues/vue_accueil");
+            $vue->setVar("afficher", true);
+            $vue->setVar("mesSpectacles", $mesSpectacles);
+            $vue->setVar("nbPages", $nbPagesSpectacle);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la suppression du spectacle.");
+        }
         return $vue;
     }
 
     public function ajouterIntervenant(PDO $pdo) : View {
         $existePas = false;
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
-        // Recupere les données de la liste des métiers des intervenants
-        $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
-        $vue = new View("vues/vue_ajouter_intervenant");
-        $vue->setVar("searchStmt",$searchStmt);
-        $vue->setVar("idSpectacle",$idSpectacle);
-        $vue->setVar("existePas",$existePas);
+        try {            // Recupere les données de la liste des métiers des intervenants
+            $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
+            $vue = new View("vues/vue_ajouter_intervenant");
+            $vue->setVar("searchStmt", $searchStmt);
+            $vue->setVar("idSpectacle", $idSpectacle);
+            $vue->setVar("existePas", $existePas);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de l'ajout de l'intervenant.");
+        }
         return $vue;
     }
     
@@ -200,19 +232,24 @@ class SpectacleControleur {
         $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
-        $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
-        // Recupere les données de la liste des métiers des intervenants
-        $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
-        $vue = new View("vues/vue_modifier_intervenant");
-        $vue->setVar("existePas",false);
-        $vue->setVar("searchStmt",$searchStmt);
-        $vue->setVar("nom", $intervenantAModifier['nom']);
-        $vue->setVar("prenom", $intervenantAModifier['prenom']);
-        $vue->setVar("mail", $intervenantAModifier['mail']);
-        $vue->setVar("ancienMetier", $intervenantAModifier['typeIntervenant']);
-        $vue->setVar("ancienSurScene", $intervenantAModifier['surScene']);
-        $vue->setVar("idIntervenant",$idIntervenant);
-        $vue->setVar("idSpectacle",$idSpectacle);
+        try {
+            $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
+            // Recupere les données de la liste des métiers des intervenants
+            $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
+            $vue = new View("vues/vue_modifier_intervenant");
+            $vue->setVar("existePas", false);
+            $vue->setVar("searchStmt", $searchStmt);
+            $vue->setVar("nom", $intervenantAModifier['nom']);
+            $vue->setVar("prenom", $intervenantAModifier['prenom']);
+            $vue->setVar("mail", $intervenantAModifier['mail']);
+            $vue->setVar("ancienMetier", $intervenantAModifier['typeIntervenant']);
+            $vue->setVar("ancienSurScene", $intervenantAModifier['surScene']);
+            $vue->setVar("idIntervenant", $idIntervenant);
+            $vue->setVar("idSpectacle", $idSpectacle);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la modification de l'intervenant.");
+        }
         return $vue;
     }
 
@@ -228,71 +265,79 @@ class SpectacleControleur {
         $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
         // Récupere true si on modifier un intervenant
         $modifier = htmlspecialchars(HttpHelper::getParam('modifier'));
-        if ($modifier == 'true') {
-            $existePas = $this->spectacleModele->existeIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
-            if (!$existePas) {
-                $this->spectacleModele->modifIntervenant($pdo, $nom, $prenom, $mail, $surScene, $typeIntervenant, $idIntervenant);
-                // Mets les données dans la vue
-                $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
-                $vue = new View("vues/vue_intervenant");
-                $vue->setVar("idSpectacle",$idSpectacle);
-                $vue->setVar("search_stmt",$search_stmt);
-                return $vue;
+        try {
+            if ($modifier == 'true') {
+                $existePas = $this->spectacleModele->existeIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
+                if (!$existePas) {
+                    $this->spectacleModele->modifIntervenant($pdo, $nom, $prenom, $mail, $surScene, $typeIntervenant, $idIntervenant);
+                    // Mets les données dans la vue
+                    $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
+                    $vue = new View("vues/vue_intervenant");
+                    $vue->setVar("idSpectacle", $idSpectacle);
+                    $vue->setVar("search_stmt", $search_stmt);
+                    return $vue;
+                } else {
+                    // Raffiche la page de modification
+                    $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
+                    $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
+                    $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
+                    // Recupere les données de la liste des métiers des intervenants
+                    $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
+                    $vue = new View("vues/vue_modifier_intervenant");
+                    $vue->setVar("existePas", true);
+                    $vue->setVar("searchStmt", $searchStmt);
+                    $vue->setVar("nom", $intervenantAModifier['nom']);
+                    $vue->setVar("prenom", $intervenantAModifier['prenom']);
+                    $vue->setVar("mail", $intervenantAModifier['mail']);
+                    $vue->setVar("ancienMetier", $intervenantAModifier['typeIntervenant']);
+                    $vue->setVar("ancienSurScene", $intervenantAModifier['surScene']);
+                    $vue->setVar("idIntervenant", $idIntervenant);
+                    $vue->setVar("idSpectacle", $idSpectacle);
+                    return $vue;
+                }
             } else {
-                // Raffiche la page de modification
-                $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
-                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
-                $intervenantAModifier = $this->spectacleModele->intervenant($pdo, $idIntervenant);
-                // Recupere les données de la liste des métiers des intervenants
-                $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
-                $vue = new View("vues/vue_modifier_intervenant");
-                $vue->setVar("existePas",true);
-                $vue->setVar("searchStmt",$searchStmt);
-                $vue->setVar("nom", $intervenantAModifier['nom']);
-                $vue->setVar("prenom", $intervenantAModifier['prenom']);
-                $vue->setVar("mail", $intervenantAModifier['mail']);
-                $vue->setVar("ancienMetier", $intervenantAModifier['typeIntervenant']);
-                $vue->setVar("ancienSurScene", $intervenantAModifier['surScene']);
-                $vue->setVar("idIntervenant",$idIntervenant);
-                $vue->setVar("idSpectacle",$idSpectacle);
-                return $vue;
+                // Regarde si l'intervenant a insérer existe déja.
+                $existePas = $this->spectacleModele->existeIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
+                if (!$existePas) {
+                    $this->spectacleModele->insertionIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
+                    // Mets les données dans la vue
+                    //Renvoie le nom prénom et métier de notre artiste
+                    $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
+                    $vue = new View("vues/vue_intervenant");
+                    $vue->setVar("idSpectacle", $idSpectacle);
+                    $vue->setVar("search_stmt", $search_stmt);
+                    return $vue;
+                } else {
+                    $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
+                    // Recupere les données de la liste des métiers des intervenants
+                    $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
+                    $vue = new View("vues/vue_ajouter_intervenant");
+                    $vue->setVar("searchStmt", $searchStmt);
+                    $vue->setVar("idSpectacle", $idSpectacle);
+                    $vue->setVar("existePas", $existePas);
+                    return $vue;
+                }
             }
-        } else {
-            // Regarde si l'intervenant a insérer existe déja.
-            $existePas = $this->spectacleModele->existeIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
-            if(!$existePas) {
-                $this->spectacleModele->insertionIntervenant($pdo, $idSpectacle, $nom, $prenom, $mail, $surScene, $typeIntervenant);
-                // Mets les données dans la vue
-                //Renvoie le nom prénom et métier de notre artiste
-                $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
-                $vue = new View("vues/vue_intervenant");
-                $vue->setVar("idSpectacle",$idSpectacle);
-                $vue->setVar("search_stmt",$search_stmt);
-                return $vue;
-            } else {
-                $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
-                // Recupere les données de la liste des métiers des intervenants
-                $searchStmt = $this->spectacleModele->listeMetiersIntervenants($pdo);
-                $vue = new View("vues/vue_ajouter_intervenant");
-                $vue->setVar("searchStmt",$searchStmt);
-                $vue->setVar("idSpectacle",$idSpectacle);
-                $vue->setVar("existePas",$existePas);
-                return $vue;
-            }
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de l'ajout de l'intervenant.");
+            return $vue;
         }
-        
-        
     }
     
     public function afficherIntervenant(PDO $pdo) {
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
 
-        //Renvoie le nom prénom et métier de notre intervenant
-        $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
-        
-        $vue = new View("vues/vue_intervenant");
-        $vue->setVar("idSpectacle",$idSpectacle);
-        $vue->setVar("search_stmt",$search_stmt);
+        try {            //Renvoie le nom prénom et métier de notre intervenant
+            $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
+
+            $vue = new View("vues/vue_intervenant");
+            $vue->setVar("idSpectacle", $idSpectacle);
+            $vue->setVar("search_stmt", $search_stmt);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de l'affichage des intervenants.");
+        }
         return $vue;
     }
 
@@ -300,15 +345,20 @@ class SpectacleControleur {
     {
         $idSpectacle = htmlspecialchars(HttpHelper::getParam('idSpectacle'));
         $idIntervenant = htmlspecialchars(HttpHelper::getParam('idIntervenant'));
-        
-        $this->spectacleModele->supprimerIntervenant($pdo, $idIntervenant);
 
-        //Renvoie le nom prénom et métier de notre intervenant
-        $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
-        
-        $vue = new View("vues/vue_intervenant");
-        $vue->setVar("idSpectacle",$idSpectacle);
-        $vue->setVar("search_stmt",$search_stmt);
+        try {
+            $this->spectacleModele->supprimerIntervenant($pdo, $idIntervenant);
+
+            //Renvoie le nom prénom et métier de notre intervenant
+            $search_stmt = $this->spectacleModele->infoIntervenant($pdo, $idSpectacle);
+
+            $vue = new View("vues/vue_intervenant");
+            $vue->setVar("idSpectacle", $idSpectacle);
+            $vue->setVar("search_stmt", $search_stmt);
+        } catch (\PDOException $e) {
+            $vue = new View("vues/vue_erreur");
+            $vue->setVar("message", "Erreur lors de la suppression de l'intervenant.");
+        }
         return $vue;
     }
 }
